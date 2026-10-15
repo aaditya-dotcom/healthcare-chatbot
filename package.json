@@ -1,0 +1,27 @@
+{
+  "name": "medicure-ai-medical-chatbot",
+  "version": "1.0.0",
+  "description": "Smart, empathetic Medical AI Chatbot & Clinical Health Consultation Assistant powered by OpenAI",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "medical-ai",
+    "healthcare",
+    "chatbot",
+    "openai",
+    "symptom-checker",
+    "health-assistant"
+  ],
+  "author": "Aditya Sharma",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "openai": "^4.86.1"
+  }
+}

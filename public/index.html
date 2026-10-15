@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediCure AI — Intelligent Medical Chatbot & Health Assistant</title>
+  <meta name="description" content="Empathetic, clinical-grade medical AI consultation, symptom triage, medication information, and home care recommendations powered by OpenAI.">
+  
+  <!-- Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for crisp medical UI -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Marked.js for fast markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Urgent Emergency Banner (Collapsible) -->
+  <div class="emergency-banner" id="emergencyBanner">
+    <div class="emergency-content">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span><strong>Medical Emergency Notice:</strong> If you are experiencing severe chest pain, sudden numbness, or shortness of breath, please immediately contact emergency services (<strong>112 / 911 / 108</strong>).</span>
+    </div>
+    <div class="emergency-actions">
+      <button class="btn-sos-quick" id="openEmergencyModalBtn"><i class="fa-solid fa-phone"></i> Emergency Helplines</button>
+      <button class="btn-close-banner" id="closeBannerBtn" aria-label="Dismiss banner">&times;</button>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon-wrapper">
+            <i class="fa-solid fa-heart-pulse logo-icon"></i>
+            <span class="pulse-ring"></span>
+          </div>
+          <div class="logo-text">
+            <h2>MediCure <span>AI</span></h2>
+            <p>Clinical Health Assistant</p>
+          </div>
+        </div>
+        <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close sidebar">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="btn-new-chat" id="newChatBtn">
+          <i class="fa-solid fa-plus"></i>
+          <span>New Consultation</span>
+        </button>
+      </div>
+
+      <!-- Quick Triage Toolkit -->
+      <div class="sidebar-section">
+        <h4 class="section-title"><i class="fa-solid fa-stethoscope"></i> Clinical Tools</h4>
+        <div class="tool-list">
+          <button class="tool-btn" id="openTriageBtn">
+            <div class="tool-icon triage"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div class="tool-info">
+              <span class="tool-name">Symptom Triage Form</span>
+              <span class="tool-desc">Guided clinical checkup</span>
+            </div>
+          </button>
+          <button class="tool-btn" id="quickMedicineInfoBtn">
+            <div class="tool-icon med"><i class="fa-solid fa-pills"></i></div>
+            <div class="tool-info">
+              <span class="tool-name">Medication Guide</span>
+              <span class="tool-desc">Uses, cautions & dosage</span>
+            </div>
+          </button>
+          <button class="tool-btn" id="quickDietBtn">
+            <div class="tool-icon diet"><i class="fa-solid fa-apple-whole"></i></div>
+            <div class="tool-info">
+              <span class="tool-name">Diet & Wellness</span>
+              <span class="tool-desc">Recovery & nutrition advice</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Consultations / History -->
+      <div class="sidebar-section history-section">
+        <div class="section-header-row">
+          <h4 class="section-title"><i class="fa-regular fa-clock"></i> Recent Consultations</h4>
+          <button class="btn-icon-subtle" id="clearHistoryBtn" title="Clear History">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">No previous consultations yet.</div>
+        </div>
+      </div>
+
+      <!-- Footer / Status Card -->
+      <div class="sidebar-footer">
+        <div class="ai-status-pill" id="aiStatusPill">
+          <span class="status-dot"></span>
+          <span class="status-label" id="statusLabel">OpenAI: Checking...</span>
+        </div>
+        <div class="disclaimer-mini">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>AI-generated insights. Not a replacement for a certified doctor.</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navigation Bar -->
+      <header class="top-nav">
+        <div class="top-nav-left">
+          <button class="btn-sidebar-toggle" id="sidebarToggleBtn" aria-label="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="consultation-meta">
+            <h1 class="consultation-title" id="consultationTitle">General Medical Consultation</h1>
+            <span class="active-model-tag" id="activeModelTag"><i class="fa-solid fa-brain"></i> GPT-4o-mini</span>
+          </div>
+        </div>
+
+        <div class="top-nav-right">
+          <button class="nav-btn" id="exportChatBtn" title="Export Consultation Summary">
+            <i class="fa-solid fa-file-arrow-down"></i>
+            <span class="btn-text">Export</span>
+          </button>
+          <button class="nav-btn" id="settingsBtn" title="Settings & OpenAI Key">
+            <i class="fa-solid fa-gear"></i>
+            <span class="btn-text">Settings</span>
+          </button>
+          <button class="nav-btn theme-toggle-btn" id="themeToggleBtn" title="Switch Theme">
+            <i class="fa-solid fa-sun" id="themeIcon"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat Container -->
+      <section class="chat-container" id="chatContainer">
+        <!-- Welcome Hero View (Displayed when no messages) -->
+        <div class="welcome-hero" id="welcomeHero">
+          <div class="hero-badge">
+            <i class="fa-solid fa-user-doctor"></i>
+            <span>24/7 Virtual Health Companion</span>
+          </div>
+          <h2 class="hero-title">How can I assist your health today?</h2>
+          <p class="hero-subtitle">Describe your symptoms, ask about medications, or request safe home remedies. Our clinical AI will guide you with structured, empathetic advice.</p>
+
+          <!-- Quick Suggestion Chips Grid -->
+          <div class="quick-prompts-grid">
+            <button class="prompt-card" data-prompt="I have had a fever (101°F) with headache and body chills for 2 days. What should I do?">
+              <div class="prompt-icon"><i class="fa-solid fa-temperature-arrow-up"></i></div>
+              <div class="prompt-content">
+                <strong>Fever & Body Chills</strong>
+                <p>101°F fever with headache & fatigue</p>
+              </div>
+            </button>
+            <button class="prompt-card" data-prompt="Can I safely take Paracetamol and Ibuprofen together? What precautions should I follow?">
+              <div class="prompt-icon"><i class="fa-solid fa-tablets"></i></div>
+              <div class="prompt-content">
+                <strong>Medication Interaction</strong>
+                <p>Paracetamol & Ibuprofen safety & timing</p>
+              </div>
+            </button>
+            <button class="prompt-card" data-prompt="I have severe acidity and burning in my chest after spicy dinner. How to get immediate relief?">
+              <div class="prompt-icon"><i class="fa-solid fa-fire-flame-simple"></i></div>
+              <div class="prompt-content">
+                <strong>Acidity & Heartburn</strong>
+                <p>Chest burning, GERD relief & foods to eat</p>
+              </div>
+            </button>
+            <button class="prompt-card" data-prompt="Persistent dry cough and scratchy sore throat for a week without fever. What are effective home remedies?">
+              <div class="prompt-icon"><i class="fa-solid fa-head-side-cough"></i></div>
+              <div class="prompt-content">
+                <strong>Dry Cough & Sore Throat</strong>
+                <p>Scratchy throat, gargles & steam therapy</p>
+              </div>
+            </button>
+          </div>
+
+          <!-- Important Security & OpenAI Key Alert if missing -->
+          <div class="key-status-banner" id="keyPromptBanner">
+            <div class="banner-left">
+              <i class="fa-solid fa-key"></i>
+              <div>
+                <strong>OpenAI Integration Ready</strong>
+                <p>Add your OpenAI API key in Settings for live GPT-4o intelligence, or test with our intelligent Clinical Demo engine.</p>
+              </div>
+            </div>
+            <button class="btn-setup-key" id="bannerSetupKeyBtn">Setup API Key</button>
+          </div>
+        </div>
+
+        <!-- Chat Stream -->
+        <div class="messages-stream" id="messagesStream"></div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator-wrapper" id="typingIndicator" style="display: none;">
+          <div class="bot-avatar-typing">
+            <i class="fa-solid fa-heart-pulse"></i>
+          </div>
+          <div class="typing-bubble">
+            <div class="typing-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <span class="typing-text">MediCure AI is evaluating clinical parameters...</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chat Input Area -->
+      <footer class="chat-input-area">
+        <!-- Quick Symptom Tags Bar -->
+        <div class="quick-tags-scroll">
+          <span class="tags-label"><i class="fa-solid fa-bolt"></i> Quick Tags:</span>
+          <button class="tag-chip" data-text="I am feeling dizzy and lightheaded.">Dizziness</button>
+          <button class="tag-chip" data-text="Migraine headache on the left side with nausea.">Migraine</button>
+          <button class="tag-chip" data-text="Stomach cramps and loose motion since morning.">Stomach Cramps</button>
+          <button class="tag-chip" data-text="Lower back pain after heavy lifting or sitting.">Back Pain</button>
+          <button class="tag-chip" data-text="Allergic sneezing, runny nose, and itchy eyes.">Allergy & Sneezing</button>
+          <button class="tag-chip" data-text="Is it normal to have elevated blood pressure under stress?">Blood Pressure</button>
+        </div>
+
+        <form class="input-form" id="chatForm">
+          <div class="input-wrapper">
+            <textarea 
+              id="chatInput" 
+              placeholder="Describe symptoms, medications, or questions (e.g. 'Sirf 2 din se tez sar dard hai...')"
+              rows="1"
+              autocomplete="off"
+            ></textarea>
+            
+            <div class="input-controls">
+              <!-- Voice Input Button (Web Speech API) -->
+              <button type="button" class="btn-input-action mic-btn" id="voiceInputBtn" title="Speak your symptoms (Voice Input)">
+                <i class="fa-solid fa-microphone" id="micIcon"></i>
+              </button>
+              
+              <!-- Send Button -->
+              <button type="submit" class="btn-send" id="sendBtn" title="Send message (Enter)">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="input-footer-note">
+            <span>Press <kbd>Enter</kbd> to send, <kbd>Shift + Enter</kbd> for new line • Voice & Multilingual (English / Hinglish / Hindi) supported</span>
+          </div>
+        </form>
+      </footer>
+    </main>
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- 1. Settings & API Key Modal -->
+  <dialog class="modal-dialog" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i class="fa-solid fa-sliders"></i>
+          <h3>Chatbot & OpenAI Configuration</h3>
+        </div>
+        <button class="modal-close-btn" id="closeSettingsModalBtn" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="apiKeyInput">
+            <strong>OpenAI API Key</strong>
+            <span class="sub-label">Stored locally in your browser or saved to server .env</span>
+          </label>
+          <div class="password-input-wrapper">
+            <input type="password" id="apiKeyInput" placeholder="sk-proj-..." autocomplete="off">
+            <button type="button" class="btn-toggle-visibility" id="toggleKeyVisibilityBtn">
+              <i class="fa-regular fa-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+          <p class="field-hint"><i class="fa-solid fa-lock"></i> Your key is never shared publicly and only used for your consultation completions.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="modelSelect">
+            <strong>AI Model Selection</strong>
+            <span class="sub-label">Choose reasoning capability</span>
+          </label>
+          <select id="modelSelect" class="custom-select">
+            <option value="gpt-4o-mini" selected>GPT-4o Mini (Fast, Intelligent & Cost-efficient)</option>
+            <option value="gpt-4o">GPT-4o (State-of-the-Art Complex Medical Reasoning)</option>
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Legacy Fast Engine)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <strong>Save Options</strong>
+          </label>
+          <div class="checkbox-wrapper">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="saveToServerCheckbox" checked>
+              <span class="checkmark"></span>
+              <span>Save permanently to project <code>.env</code> file on server</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="alert-box-info">
+          <i class="fa-solid fa-circle-info"></i>
+          <div>
+            <strong>Interactive Demo Mode:</strong>
+            <p>If you don't have an API key right now, you can still chat! MediCure AI will run its built-in clinical triage preview engine automatically.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelSettingsBtn">Close</button>
+        <button class="btn-primary" id="saveSettingsBtn"><i class="fa-solid fa-check"></i> Save Settings</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 2. Symptom Triage Form Modal -->
+  <dialog class="modal-dialog" id="triageModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i class="fa-solid fa-notes-medical"></i>
+          <h3>Clinical Symptom Triage Assessment</h3>
+        </div>
+        <button class="modal-close-btn" id="closeTriageModalBtn" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Fill out this quick structured checkup so MediCure AI can provide a precise, customized assessment.</p>
+        
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="triageAge">Age (Years)</label>
+            <input type="number" id="triageAge" placeholder="e.g. 26" min="1" max="120">
+          </div>
+          <div class="form-group">
+            <label for="triageGender">Biological Sex</label>
+            <select id="triageGender" class="custom-select">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other / Prefer not to say">Other / Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="triageSymptoms">Chief Complaint / Primary Symptoms</label>
+          <textarea id="triageSymptoms" rows="2" placeholder="e.g., Throbbing headache, mild fever, nausea..."></textarea>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="triageDuration">Duration</label>
+            <select id="triageDuration" class="custom-select">
+              <option value="Less than 24 hours">Less than 24 hours</option>
+              <option value="1 - 3 days">1 - 3 days</option>
+              <option value="4 - 7 days">4 - 7 days</option>
+              <option value="More than 1 week">More than 1 week</option>
+              <option value="Chronic (Months)">Chronic (Months)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="triageSeverity">Pain / Discomfort Severity (1 to 10): <span id="severityVal">5</span></label>
+            <input type="range" id="triageSeverity" min="1" max="10" value="5" class="custom-slider">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="triageHistory">Preexisting Conditions & Current Medications (Optional)</label>
+          <input type="text" id="triageHistory" placeholder="e.g., Asthmatic, taking Metformin for Diabetes, none...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelTriageBtn">Cancel</button>
+        <button class="btn-primary" id="submitTriageBtn"><i class="fa-solid fa-stethoscope"></i> Submit to Consultation</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 3. Emergency Helplines Directory Modal -->
+  <dialog class="modal-dialog" id="emergencyModal">
+    <div class="modal-card emergency-dialog-card">
+      <div class="modal-header emergency-header">
+        <div class="modal-title-group">
+          <i class="fa-solid fa-truck-medical"></i>
+          <h3>Emergency Medical Helplines</h3>
+        </div>
+        <button class="modal-close-btn" id="closeEmergencyModalBtn" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="emergency-warning-text">If you or someone around you has life-threatening conditions (loss of consciousness, severe trauma, anaphylaxis, severe breathing difficulty), call emergency services immediately.</p>
+        
+        <div class="helpline-country-block">
+          <h4>🇮🇳 India</h4>
+          <div class="helpline-grid">
+            <div class="helpline-item">
+              <span class="helpline-name">National Emergency</span>
+              <a href="tel:112" class="helpline-number">112</a>
+            </div>
+            <div class="helpline-item">
+              <span class="helpline-name">Ambulance</span>
+              <a href="tel:108" class="helpline-number">108 / 102</a>
+            </div>
+            <div class="helpline-item">
+              <span class="helpline-name">National Health Portal</span>
+              <a href="tel:18001801104" class="helpline-number">1800-180-1104</a>
+            </div>
+            <div class="helpline-item">
+              <span class="helpline-name">Mental Health (KIRAN)</span>
+              <a href="tel:18005990019" class="helpline-number">1800-599-0019</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="helpline-country-block">
+          <h4>🇺🇸 United States & 🇨🇦 Canada</h4>
+          <div class="helpline-grid">
+            <div class="helpline-item">
+              <span class="helpline-name">Emergency Services</span>
+              <a href="tel:911" class="helpline-number">911</a>
+            </div>
+            <div class="helpline-item">
+              <span class="helpline-name">Poison Control Center</span>
+              <a href="tel:18002221222" class="helpline-number">1-800-222-1222</a>
+            </div>
+            <div class="helpline-item">
+              <span class="helpline-name">Crisis & Suicide Lifeline</span>
+              <a href="tel:988" class="helpline-number">988</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="helpline-country-block">
+          <h4>🇬🇧 United Kingdom & 🇪🇺 Europe</h4>
+          <div class="helpline-grid">
+            <div class="helpline-item">
+              <span class="helpline-name">Emergency</span>
+              <a href="tel:999" class="helpline-number">999 / 112</a>
+            </div>
+            <div class="helpline-item">
+              <span class="helpline-name">NHS Non-Emergency Health</span>
+              <a href="tel:111" class="helpline-number">111</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="dismissEmergencyModalBtn">I Understand</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- App Main Scripts -->
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
